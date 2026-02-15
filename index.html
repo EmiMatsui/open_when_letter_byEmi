@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open When — from Emi 💌</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Zen+Kaku+Gothic+New:wght@300;400;700&family=Dancing+Script:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #0d0208;
+  --rose: #ff4d6d;
+  --rose2: #ff85a1;
+  --crimson: #c9184a;
+  --gold: #ffd166;
+  --cream: #fff0f3;
+  --soft: #ffb3c1;
+  --glow: rgba(255,77,109,0.4);
+  --glass: rgba(255,255,255,0.04);
+  --border: rgba(255,133,161,0.2);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--cream);
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* CURSOR */
+.cursor-dot {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--rose);
+  border-radius: 50%;
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+  z-index: 9999;
+  box-shadow: 0 0 12px var(--rose), 0 0 24px var(--rose);
+  transition: width 0.2s, height 0.2s;
+}
+.cursor-ring {
+  position: fixed;
+  width: 32px; height: 32px;
+  border: 1.5px solid var(--rose2);
+  border-radius: 50%;
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.6;
+  transition: width 0.25s ease, height 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
+}
+.cursor-ring.hover {
+  width: 52px; height: 52px;
+  opacity: 1;
+  border-color: var(--gold);
+}
+
+/* CANVAS */
+#bgCanvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* HERO */
+.hero {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 20px;
+  overflow: hidden;
+}
+
+.hero-bg-text {
+  position: absolute;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(100px, 22vw, 260px);
+  font-weight: 700;
+  font-style: italic;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255,77,109,0.06);
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+  animation: driftText 18s ease-in-out infinite alternate;
+  letter-spacing: -0.02em;
+}
+@keyframes driftText {
+  from { transform: translateX(-4%) rotate(-1.5deg); opacity: 0.6; }
+  to   { transform: translateX(4%) rotate(1.5deg); opacity: 1; }
+}
+
+.count-badge {
+  position: absolute;
+  top: 32px; right: 36px;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(60px, 12vw, 110px);
+  font-weight: 700;
+  font-style: italic;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255,133,161,0.15);
+  line-height: 1;
+  user-select: none;
+  opacity: 0;
+  animation: slideIn 1s ease forwards 1.5s;
+}
+.from-tag {
+  position: absolute;
+  bottom: 36px; left: 36px;
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  color: var(--gold);
+  opacity: 0;
+  animation: slideIn 0.8s ease forwards 1.3s;
+}
+
+.hero-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.28em;
+  color: var(--rose);
+  text-transform: uppercase;
+  margin-bottom: 28px;
+  opacity: 0;
+  animation: slideIn 0.8s ease forwards 0.4s;
+  border: 1px solid var(--border);
+  display: inline-block;
+  padding: 7px 18px;
+  border-radius: 100px;
+}
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3.2rem, 11vw, 8rem);
+  font-style: italic;
+  font-weight: 700;
+  line-height: 0.92;
+  margin-bottom: 24px;
+  opacity: 0;
+  animation: slideIn 0.8s ease forwards 0.65s;
+}
+.hero-title .line1 {
+  display: block;
+  background: linear-gradient(135deg, #fff0f3, var(--soft));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-title .line2 {
+  display: block;
+  background: linear-gradient(135deg, var(--rose), var(--crimson));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 40px rgba(255,77,109,0.5));
+}
+
+.hero-sub {
+  font-size: clamp(0.82rem, 1.8vw, 0.98rem);
+  color: rgba(255,179,193,0.65);
+  font-style: italic;
+  margin-bottom: 52px;
+  opacity: 0;
+  animation: slideIn 0.8s ease forwards 0.9s;
+  max-width: 360px;
+  line-height: 1.7;
+}
+
+.hero-scroll {
+  opacity: 0;
+  animation: slideIn 0.8s ease forwards 1.15s, floatAnim 2.5s ease-in-out infinite 2s;
+  font-size: 1.6rem;
+  cursor: pointer;
+  display: inline-block;
+}
+@keyframes floatAnim {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+
+/* SECTION */
+.section {
+  position: relative;
+  z-index: 2;
+  padding: 20px 0 100px;
+}
+.section-header {
+  text-align: center;
+  padding: 0 20px 64px;
+}
+.section-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.3em;
+  color: var(--rose);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: block;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.7rem, 4vw, 2.6rem);
+  font-style: italic;
+  color: var(--cream);
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 18px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* CARD */
+.card {
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(28px);
+  animation: cardIn 0.55s ease forwards;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+@keyframes cardIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,77,109,0.1) 0%, transparent 65%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: 0;
+}
+.card:hover::before { opacity: 1; }
+.card:hover {
+  border-color: rgba(255,133,161,0.5);
+  box-shadow: 0 20px 60px rgba(255,77,109,0.18), inset 0 1px 0 rgba(255,255,255,0.05);
+  transform: translateY(-5px) scale(1.012);
+}
+
+.card-inner {
+  padding: 26px 22px 22px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Envelope art */
+.card-envelope {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  margin-bottom: 20px;
+}
+.env-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.env-svg {
+  width: 130px; height: 86px;
+  filter: drop-shadow(0 6px 20px rgba(255,77,109,0.18));
+  transition: filter 0.3s;
+}
+.card:hover .env-svg {
+  filter: drop-shadow(0 10px 30px rgba(255,77,109,0.45));
+}
+.flap-path {
+  transform-origin: 70px 0;
+  transform-box: fill-box;
+  transition: transform 0.55s cubic-bezier(0.4,0,0.2,1);
+}
+.card:hover .flap-path {
+  transform: rotateX(-170deg);
+}
+.letter-slip {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0px);
+  width: 80px; height: 52px;
+  background: linear-gradient(160deg, #fff5f7, #ffdde6);
+  border-radius: 3px 3px 0 0;
+  transition: transform 0.55s cubic-bezier(0.4,0,0.2,1) 0.08s;
+  z-index: -1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+}
+.card:hover .letter-slip { transform: translateX(-50%) translateY(-22px); }
+
+/* Card meta */
+.card-num {
+  position: absolute;
+  top: 14px; right: 18px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  color: rgba(255,133,161,0.3);
+  letter-spacing: 0.1em;
+}
+.card-open-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.25em;
+  color: var(--rose);
+  text-transform: uppercase;
+  opacity: 0.65;
+  display: block;
+  margin-bottom: 5px;
+}
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.02rem;
+  font-style: italic;
+  color: var(--cream);
+  line-height: 1.35;
+}
+.card-action {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 0.62rem;
+  color: rgba(255,133,161,0.35);
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 0.12em;
+  transition: color 0.3s;
+}
+.card:hover .card-action { color: var(--rose); }
+.action-dot {
+  width: 5px; height: 5px;
+  background: currentColor;
+  border-radius: 50%;
+  animation: blink 1.5s ease-in-out infinite;
+}
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+
+/* MODAL */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+.overlay-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(4,0,2,0.88);
+  backdrop-filter: blur(24px);
+}
+.modal {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 560px;
+  max-height: 88vh;
+  overflow-y: auto;
+  background: #120009;
+  border: 1px solid rgba(255,133,161,0.22);
+  border-radius: 22px;
+  box-shadow: 0 40px 100px rgba(255,77,109,0.22), inset 0 1px 0 rgba(255,133,161,0.08);
+  transform: translateY(40px) scale(0.93);
+  transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
+}
+.overlay.active .modal {
+  transform: translateY(0) scale(1);
+}
+.modal::-webkit-scrollbar { width: 3px; }
+.modal::-webkit-scrollbar-thumb { background: var(--crimson); border-radius: 2px; }
+
+.modal-header {
+  padding: 38px 42px 28px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.modal-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% -20%, rgba(255,77,109,0.14) 0%, transparent 65%);
+  pointer-events: none;
+  border-radius: 22px 22px 0 0;
+}
+.modal-icon {
+  font-size: 2.6rem;
+  display: block;
+  margin-bottom: 16px;
+  animation: iconBounce 0.6s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes iconBounce {
+  0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+  60%  { transform: scale(1.15) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.modal-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  color: var(--rose);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 9px;
+  opacity: 0.75;
+}
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-style: italic;
+  color: var(--cream);
+  line-height: 1.2;
+  padding-right: 40px;
+}
+.modal-close {
+  position: absolute;
+  top: 22px; right: 22px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  color: rgba(255,179,193,0.55);
+  font-size: 0.88rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.modal-close:hover {
+  background: rgba(255,77,109,0.14);
+  border-color: var(--rose);
+  color: var(--cream);
+  transform: rotate(90deg);
+}
+.modal-body {
+  padding: 32px 42px 44px;
+  font-size: 0.95rem;
+  line-height: 1.95;
+  color: rgba(255,240,243,0.82);
+}
+.modal-body p { margin-bottom: 18px; }
+.modal-body .shout {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.08rem;
+  color: var(--rose);
+  letter-spacing: 0.03em;
+  display: block;
+}
+.modal-body .signature {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.6rem;
+  color: var(--gold);
+  display: block;
+  margin-top: 30px;
+}
+.modal-deco {
+  text-align: center;
+  margin: 20px 0;
+  letter-spacing: 0.5em;
+  color: rgba(255,133,161,0.3);
+  font-size: 0.85rem;
+}
+
+/* FOOTER */
+.footer {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 60px 20px 90px;
+}
+.footer-line {
+  width: 1px; height: 64px;
+  background: linear-gradient(to bottom, transparent, rgba(255,133,161,0.2), transparent);
+  margin: 0 auto 24px;
+}
+.footer-text {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.05rem;
+  color: rgba(255,212,166,0.55);
+}
+
+/* ANIMATIONS */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Burst particles HTML */
+.burst-el {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1001;
+  font-size: 1.1rem;
+  will-change: transform, opacity;
+  animation: burstAnim 0.85s ease forwards;
+}
+@keyframes burstAnim {
+  0%   { opacity: 1; transform: translate(-50%,-50%) scale(0) rotate(0deg); }
+  55%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--bx,0px)), calc(-50% + var(--by,0px))) scale(1.2) rotate(var(--br,0deg)); }
+}
+
+@media (max-width:600px) {
+  .modal-header, .modal-body { padding-left: 24px; padding-right: 24px; }
+  .count-badge, .from-tag { display: none; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-bg-text">LOVE</div>
+  <div class="count-badge">20</div>
+  <div class="from-tag">✦ from Emi, with love ✦</div>
+  <span class="hero-tag">✉ open when letters</span>
+  <h1 class="hero-title">
+    <span class="line1">Letters</span>
+    <span class="line2">for You</span>
+  </h1>
+  <p class="hero-sub">20 envelopes — open only when the moment is right</p>
+  <span class="hero-scroll" onclick="document.getElementById('letters').scrollIntoView({behavior:'smooth'})">↓</span>
+</section>
+
+<!-- LETTERS -->
+<section class="section" id="letters">
+  <div class="section-header">
+    <span class="section-label">✦ a collection ✦</span>
+    <h2 class="section-title">Pick your moment</h2>
+  </div>
+  <div class="grid" id="grid"></div>
+</section>
+
+<footer class="footer">
+  <div class="footer-line"></div>
+  <p class="footer-text">made with every piece of my heart 💕</p>
+</footer>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="overlay-bg" id="overlayBg"></div>
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-glow"></div>
+      <span class="modal-icon" id="mIcon"></span>
+      <span class="modal-tag">Open When...</span>
+      <h2 class="modal-title" id="mTitle"></h2>
+      <button class="modal-close" id="mClose">✕</button>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+  </div>
+</div>
+
+<script>
+// ─── LETTER DATA ───
+const letters = [
+  { title:"It's Valentine's Day", icon:"💝",
+    body:`<p>Happy Valentine's Day~~~</p>
+<p>いやー本当はね、完全に秘密にしてサプライズしたかったんだけどこうきが途中で不機嫌になっちゃったから、ネタバレ（？）として手紙あげるねって言いました。期待に添えたら嬉しいです。</p>
+<p>今年はチョコレートはあげることはできないけどぜひ、あたたかーな気持ちになって欲しいので手紙を書きます。</p>
+<p>こう考えるとお互いチョコレート作りあって交換してたことがすごく懐かしく感じる。もう付き合って3年だよ！やっべえよ。早いよ。今はアメリカと日本で離れ離れだけど来年は一緒に過ごせるといいなと思います。一緒に手作りチョコ作ったりすのもアリだと思う！！！！
+</p>
+<p>あと最近あんま構ってあげれなくて不安にさせちゃってごめんね。別にこうきに対する気持ちが冷めたわけじゃないし、こうきことどうでもいいとか思ったことないから！これからは時間ができるからもっと連絡しますわね。</p>
+<p>いつもぉありがと、これからもよろしくお願いします。</p>
+<p>大愛してる。</p>
+<span class="signature">Emi 💕</span>` },
+
+  { title:"You Miss Me", icon:"🌙",
+    body:`<p class="shout">You think you’re the only one who misses me??</p>
+<p class="shout">I miss you too, idiot.</p>
+<div class="modal-deco">♡ ♡ ♡</div>
+<p>普通にDMでもラインでもいいから連絡してもろて。最近あまり電話できてないし電話したい。日本時間の15時、16時に電話してもいいの？していいなら毎日学校帰りにかけると思う。</p>
+<span class="signature">えみ 🌙</span>` },
+
+  { title:"You Need a Hug", icon:"🤗",
+    body:`<p>何か辛いことでもあったの？それともただうちに会いたくなっちゃったぁ？わかる。いい女すぎて中毒性半端ないもんね。</p>
+<p>次会う時、今欲しいと思ってるハグの100倍ぎゅーってするね</p>
+<div class="modal-deco">♡</div>
+<p>もしまだお互い離れたところに暮らしてたら心の中にえみが宿っていることを忘れずに。</p>
+<p>もしもうお互いすぐ会える距離ならさっさとハグしに来い。どんと構えてるから</p>
+<span class="signature">えみ 🤗</span>` },
+
+  { title:"You're on Your Way to Visit Me", icon:"✈️",
+    body:`<p>この手紙を読んでるってことは、もうすぐ会えるってこと！！</p>
+<p>嬉しいよおおおおおおおお。どんぐらいイメチェンしたのかな？まあどんなこうきでも愛してるんですけどね</p>
+<p>早く早く早く来て。</p>
+<p>あとまたsour patch食べたいな...買える余裕あったらお土産としてお願いします。まあでもこうきが健康でいたらそれでいいかな！</p>
+<p>着いたら絶対すぐ連絡してね。空港まで走っていくかもしれない（嘘じゃないかも）。最近フッ軽だから！</p>
+<div class="modal-deco">✈️ ♡ ✈️</div>
+<span class="signature">えみ 💌</span>` },
+
+  { title:"You Can't Sleep", icon:"🌛",
+    body:`<p>夜中に目が覚めちゃったの？</p>
+<p>寝ろやって言いたいところだけど、一回うちに電話してみて。もしかしたらうちも寝てるかもしれないけど気づいたら絶対出るようにするね。</p>
+<div class="modal-deco">♡</div>
+<p>あ、でもちゃんと寝るんだよ？あなた放っておくとすっごい不健康な生活しそう。あと夜更かしはお肌の大敵よ。まあもしうちがそばにいたら子守唄歌っちゃる</p>
+<p>いい夢見てね</p>
+<span class="signature">えみ 🌛</span>` },
+
+  { title:"We Had an Argument", icon:"🌧️",
+    body:`<p class="shout">先に謝っとく。ごめんね</p>
+<div class="modal-deco">♡ ♡ ♡</div>
+<p>もしかしたら感情的になってたかもしれない...</p>
+<p>傷つけるようなこと言っちゃったら本当にごめん。感情をコントロールできるようにします。</p>
+<p>うちにとってこうきが一番だしこれからもそばにいたい。もし拗ねちゃったらスネちゃまとして可愛がってください。</p>
+<span class="signature">えみ🌧️</span>` },
+
+  { title:"You Need to Feel Loved", icon:"💖",
+    body:`<p class="shout">I LOVE YOU I LOVE YOU I LOVE YOU I LOVE YOU I LOVE YOU I LOVE YOU I LOVE YOU</p>
+<div class="modal-deco">♡ ♡ ♡</div>
+<p>こうきのこと愛してるって気持ち、今どのぐらい届いた？</p>
+<p>うちに連絡してね。ちゃんと愛してるって証明するから。</p>
+<p>I apologize if my attitude was making you worried.</p>
+<p>なんだろうね、説明が難しいんだけどなんかね、家族といる時の安心感を最近こうきに抱いてるから静かに見えるけど落ち着いてるんだと思う。だけど愛がたりねぇなーって思ったら連絡してね。</p>
+<p>あ、だけど拗ねちゃまはちょっと苦手だからやめてね。ただ単に愛がほしいって言ったら思いっきり叫ぶぐらい愛すから。</p>
+<span class="signature">えみ 💕</span>` },
+<p>あなたのことが世界で一番好きで、世界で一番大事で、世界で一番愛してる。</p>
+<span class="signature">えみ 💖</span>` },
+
+  { title:"You Did Something Bad", icon:"😬",
+    body:`<p>全力で隠すか全力で謝罪か選べ。</p>
+<p>ちな隠してバレたらのリスクも考えろよ。</p>
+<div class="modal-deco">♡</div>
+<p>（正直に言ってくれる方が好きだけどね）</p>
+<span class="signature">えみ 🫶</span>` },
+
+  { title:"You Had a Bad Day", icon:"🌧",
+    body:`<p>今日、しんどかったね。お疲れさま。</p>
+<p>全部うまくいかない日ってあるよね。そういう日って本当にしんどいよね。</p>
+<p>だけどたまには息抜きしたらどう？。</p>
+<div class="modal-deco">♡</div>
+<p>好きな飲み物飲んで、横になって。今日はもうそれだけでいい。</p>
+<p>明日また話聞かせてね。</p>
+<span class="signature">えみ 🌧️💕</span>` },
+
+  { title:"It's Your Birthday", icon:"🎂",
+    body:`<p>お誕生日おめでとう！！！</p>
+<p>こうきが生まれてきてくれてよかった。本当に。</p>
+<p>こうきと出会えたこと、ずっと一緒にいられること、うちにとって一番の宝物だよ。</p>
+<div class="modal-deco">🎂 ♡ 🎂</div>
+<p>今日は思いっきり甘えていいからね。お誕生日プレゼント、何がいい？</p>
+<p>大好き。生んでくれたご両親にも感謝。</p>
+<span class="signature">えみ 🎉</span>` },
+
+  { title:"It's My Birthday", icon:"🌸",
+    body:`<p>今日はうちの誕生日！</p>
+<p>お祝いしてくれてありがとう。こうきに「おめでとう」って言ってもらえるだけで幸せ。</p>
+<p>一緒にいられる時間が増えますように。</p>
+<p>あ、だけど誕プレはほんとそこまで高いやつじゃなくていいから！！</p>
+<div class="modal-deco">🌸 ♡ 🌸</div>
+<p>愛されてるって感じながら誕生日迎えられてること、嬉しいです。</p>
+<span class="signature">えみ 🌸</span>` },
+
+  { title:"It's Our Anniversary", icon:"💍",
+    body:`<p>記念日おめでとう。</p>
+<p>この日まで一緒にいてくれてありがとう。</p>
+<p>いろいろあったけど、ずっとそばにいてくれてることが何より嬉しい。</p>
+<div class="modal-deco">♡ ♡ ♡</div>
+<p>来年も、これから先ずっとまたこの日を一緒に迎えたいな。</p>
+<p>これからもよろしくね。大好きだよ。</p>
+<span class="signature">えみ 💍</span>` },
+
+  { title:"After Our Date", icon:"🌃",
+    body:`<p>今日、楽しかったね。</p>
+<p>あなたと過ごす時間って、なんで毎回こんなに早く終わっちゃうんだろう。</p>
+<p>帰り道、ずっとさっきのこと思い出してたでしょ。うちもだよ。</p>
+<div class="modal-deco">🌃 ♡ 🌃</div>
+<p>次はいつ会える？もう会いたい。</p>
+<span class="signature">えみ 💫</span>` },
+
+  { title:"It's Your Graduation", icon:"🎓",
+    body:`<p>卒業おめでとう！</p>
+<p>本当によく頑張ったね。ずっと応援してたよ。</p>
+<p>これからの新しいステージも、きっとうまくいく。こうきのことを誰よりも信じてる。</p>
+<div class="modal-deco">🎓 ♡ 🎓</div>
+<p>どんな未来になっても、うちはここにいるよ。</p>
+<p>おめでとう、誇りに思う。</p>
+<span class="signature">えみ 🎓</span>` },
+
+  { title:"You Are Homesick", icon:"🏠",
+    body:`<p>ホームシックになっちゃった？</p>
+<p>そういう気持ち大事にしていいと思う。大切な場所を持ってるってことだから。</p>
+<p>遠くにいても、こうきのことを思ってる人がいる。ちゃんとここにいるよ。</p>
+<div class="modal-deco">🏠 ♡ 🏠</div>
+<p>愚痴ぐらいはちゃんと聞くわよ</p>
+<span class="signature">えみ 💕</span>` },
+
+  { title:"You Are Sick", icon:"🍵",
+    body:`<p>大丈夫？ちゃんと休んでる？</p>
+<p>そばにいてあげれなくてごめんね。</p>
+<p>水分ちゃんと取って、暖かくして、ゆっくりしてね。</p>
+<div class="modal-deco">🍵 ♡ 🍵</div>
+<p>早く良くなって。あなたが元気じゃないとうちも心配で落ち着かないから。</p>
+<p>快気祝い、一緒にしようね。</p>
+<span class="signature">えみ 🌿</span>` },
+
+  { title:"You Are Tired of Me", icon:"😴",
+    body:`<p class="shout">You are not tired of me.</p>
+<p class="shout">You are just tired.</p>
+<p class="shout">Go to sleep.</p>
+<div class="modal-deco">♡ ♡ ♡</div>
+<p>おやすみ。</p>
+<span class="signature">えみ 🌙</span>` },
+
+  { title:"You Are Mad at Me", icon:"🫧",
+    body:`<p class="shout">You are not mad.</p>
+<p class="shout">You are just overthinking.</p>
+<p class="shout">Go to sleep.</p>
+<div class="modal-deco">♡ ♡ ♡</div>
+<p>明日また話そう。夜の考えごとは大抵Overthinkしてる。</p>
+<p>おやすみ。</p>
+<span class="signature">えみ 🌙</span>` },
+
+  { title:"It's Christmas", icon:"🎄",
+    body:`<p>Merry Christmas！</p>
+<p>サンタさんに何お願いした？</p>
+<p>うちはこうきとずっと一緒にいられますようにってお願いしたよ。</p>
+<div class="modal-deco">🎄 ♡ 🎄</div>
+<p>多分今年はあなた忙しすぎて一緒に過ごせないかもだけど、別に気にしないでね？</p>
+<p>大好き。メリークリスマス。</p>
+<span class="signature">えみ ⭐</span>` },
+
+  { title:"It's New Year", icon:"🎍",
+    body:`<p>新年明けましておめでとうございます。</p>
+<p>今度こそ一緒に初詣に行こ。前回はうちだけ入っておみくじも1人で引いて寂しかったからね。</p>
+<p>ちょうどこうきの受験期だと思うので忙しくなくなったら一緒にいこう。</p>
+<div class="modal-deco">🎍 ♡ 🎍</div>
+<p>こんなに長くそばにいてくれてありがとう。今年もよろしくね！</p>
+<p>世界で1番愛してる。</p>
+<span class="signature">えみ 🌅</span>` }
+];
+
+// ─── CANVAS PARTICLE SYSTEM ───
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+let particles = [];
+const mouse = { x: -999, y: -999 };
+const heartChars = ['♡','♥','❤','💕','💗','💓','💞','💖'];
+const pColors = [
+  [255,77,109], [255,133,161], [201,24,74], [255,209,230], [255,166,194]
+];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+class Particle {
+  constructor(bx, by, burst) {
+    this.burst = !!burst;
+    this.reset(bx, by);
+  }
+  reset(bx, by) {
+    const c = pColors[Math.floor(Math.random() * pColors.length)];
+    this.x  = bx !== undefined ? bx : Math.random() * W;
+    this.y  = by !== undefined ? by : H + 20;
+    this.ch = heartChars[Math.floor(Math.random() * heartChars.length)];
+    this.sz = this.burst ? 13 + Math.random() * 16 : 9 + Math.random() * 14;
+    this.r  = `rgba(${c[0]},${c[1]},${c[2]},`;
+    this.a  = this.burst ? 0.9 : 0.2 + Math.random() * 0.45;
+    this.vx = this.burst ? (Math.random() - 0.5) * 7 : (Math.random() - 0.5) * 0.45;
+    this.vy = this.burst ? -(2.5 + Math.random() * 5) : -(0.35 + Math.random() * 0.55);
+    this.rot = Math.random() * 360;
+    this.rs  = (Math.random() - 0.5) * 2.5;
+    this.life = 1;
+    this.decay = this.burst ? 0.018 + Math.random() * 0.014 : 0.0007 + Math.random() * 0.0018;
+  }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.rot += this.rs;
+    this.life -= this.decay;
+    if (!this.burst) {
+      const dx = this.x - mouse.x, dy = this.y - mouse.y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < 90) { this.vx += (dx / d) * 0.12; this.vy += (dy / d) * 0.08; }
+    }
+    this.vx *= 0.992; this.vy *= 0.992;
+    if (this.life <= 0 || this.y < -60) {
+      if (this.burst) return false;
+      this.reset();
+      return true;
+    }
+    if (!this.burst && (this.x < -30 || this.x > W + 30)) { this.reset(); }
+    return true;
+  }
+  draw() {
+    const alpha = this.a * Math.max(0, this.life);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.font = `${this.sz}px serif`;
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rot * Math.PI / 180);
+    ctx.fillText(this.ch, -this.sz / 2, this.sz / 2);
+    ctx.restore();
+  }
+}
+
+for (let i = 0; i < 55; i++) {
+  const p = new Particle();
+  p.y = Math.random() * H; // scatter initial positions
+  particles.push(p);
+}
+
+function burst(x, y, count = 20) {
+  for (let i = 0; i < count; i++) particles.push(new Particle(x, y, true));
+}
+
+(function loop() {
+  ctx.clearRect(0, 0, W, H);
+  particles = particles.filter(p => p.update());
+  particles.forEach(p => p.draw());
+  requestAnimationFrame(loop);
+})();
+
+// ─── CUSTOM CURSOR ───
+const dot  = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mouse.x = e.clientX; mouse.y = e.clientY;
+  dot.style.left = e.clientX + 'px';
+  dot.style.top  = e.clientY + 'px';
+});
+(function animRing() {
+  rx += (mouse.x - rx) * 0.13;
+  ry += (mouse.y - ry) * 0.13;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('.card, button').forEach(el => {
+  el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+  el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+});
+
+// ─── BUILD CARDS ───
+const grid = document.getElementById('grid');
+letters.forEach((l, i) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.style.animationDelay = `${0.04 + i * 0.055}s`;
+
+  card.innerHTML = `
+    <div class="card-inner">
+      <div class="card-num">${String(i + 1).padStart(2, '0')}</div>
+      <div class="card-envelope">
+        <div class="letter-slip"><span>${l.icon}</span></div>
+        <div class="env-wrap">
+          <svg class="env-svg" viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="eg${i}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#280615"/>
+                <stop offset="100%" stop-color="#160208"/>
+              </linearGradient>
+              <linearGradient id="fg${i}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#3a0a1e"/>
+                <stop offset="100%" stop-color="#200410"/>
+              </linearGradient>
+            </defs>
+            <rect width="140" height="90" rx="5" fill="url(#eg${i})"/>
+            <path d="M0 24 L70 56 L140 24 L140 90 L0 90 Z" fill="rgba(180,30,70,0.1)"/>
+            <path d="M0 90 L70 56 L140 90 Z" fill="rgba(255,133,161,0.06)"/>
+            <line x1="0" y1="24" x2="70" y2="56" stroke="rgba(255,133,161,0.12)" stroke-width="0.5"/>
+            <line x1="140" y1="24" x2="70" y2="56" stroke="rgba(255,133,161,0.12)" stroke-width="0.5"/>
+            <path class="flap-path" d="M2 2 L138 2 L70 54 Z" fill="url(#fg${i})" stroke="rgba(255,133,161,0.18)" stroke-width="0.5"/>
+            <rect width="140" height="90" rx="5" fill="none" stroke="rgba(255,133,161,0.14)" stroke-width="1"/>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <span class="card-open-tag">open when</span>
+        <div class="card-title">${l.title}</div>
+      </div>
+      <div class="card-action"><div class="action-dot"></div>tap to open</div>
+    </div>`;
+
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+    card.style.setProperty('--my', ((e.clientY - r.top)  / r.height * 100) + '%');
+  });
+
+  card.addEventListener('click', e => {
+    burst(e.clientX, e.clientY, 22);
+    openModal(l);
+  });
+
+  grid.appendChild(card);
+});
+
+// Scroll-triggered card reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.card').forEach(c => observer.observe(c));
+
+// ─── MODAL ───
+const overlay  = document.getElementById('overlay');
+const overlayBg = document.getElementById('overlayBg');
+const mIcon    = document.getElementById('mIcon');
+const mTitle   = document.getElementById('mTitle');
+const mBody    = document.getElementById('mBody');
+const mClose   = document.getElementById('mClose');
+
+function openModal(l) {
+  mIcon.textContent  = l.icon;
+  mTitle.textContent = l.title;
+  mBody.innerHTML    = l.body;
+  // Re-trigger icon bounce
+  mIcon.style.animation = 'none';
+  mIcon.offsetHeight;
+  mIcon.style.animation = '';
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+mClose.addEventListener('click', e => { burst(e.clientX, e.clientY, 8); closeModal(); });
+overlayBg.addEventListener('click', closeModal);
+document.addEventListener('keydown', e => e.key === 'Escape' && closeModal());
+
+// Cursor hide on leave
+document.addEventListener('mouseleave', () => { dot.style.opacity = '0'; ring.style.opacity = '0'; });
+document.addEventListener('mouseenter', () => { dot.style.opacity = '1'; ring.style.opacity = '1'; });
+</script>
+</body>
+</html>
